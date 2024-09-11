@@ -13,10 +13,9 @@ class Parser:
     def parse_expression(self):
         # Parse either a function or an application
         left = self.parse_term()
-        if self.peek(Token.VARIABLE) or self.peek(Token.LPAREN) or self.peek(Token.LAMBDA):
-            while self.peek(Token.VARIABLE) or self.peek(Token.LPAREN):
-                right = self.parse_term()
-                left = Application(left, right)
+        while self.peek(Token.VARIABLE) or self.peek(Token.LPAREN) or self.peek(Token.LAMBDA):
+            right = self.parse_term()
+            left = Application(left, right)
         return left
 
     def parse_function(self):

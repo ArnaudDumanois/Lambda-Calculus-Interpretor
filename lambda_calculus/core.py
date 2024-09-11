@@ -41,7 +41,6 @@ class Function:
     def __hash__(self):
         return hash((self.var, self.term))
 
-
     def alpha_convert(self, new_var):
         if new_var in self.term.free_variables():
             new_name = self.generate_unique_var_name(self.var)
@@ -65,7 +64,8 @@ class Application:
         self.arg = arg
 
     def __str__(self):
-        return f'({self.func} {self.arg})'
+        func_str = f'({self.func})' if isinstance(self.func, Application) else str(self.func)
+        return f'{self.func} {self.arg}'
 
     def __repr__(self):
         return f'Application({self.func}, {self.arg})'

@@ -107,6 +107,19 @@ class LambdaCalculusTests(unittest.TestCase):
         print("Parsed Expression:", parsed_expr)
         self.assertEqual(parsed_expr, expected_expr)
 
+    def test_parser3(self):
+        input_str = "λx.λy.x y"
+        tokens = lexer(input_str)
+        parser = Parser(tokens)
+        parsed_expr = parser.parse()
+
+        # Attendu : une fonction qui prend x et retourne une fonction qui prend y et applique x à y
+        expected_expr = Function(Variable('x'), Function(Variable('y'), Application(Variable('x'), Variable('y'))))
+
+        print("Testing Parser3:")
+        print("Parsed Expression:", parsed_expr)
+        self.assertEqual(parsed_expr, expected_expr)
+
     def test_reduce1(self):
         input_str = "λx.(x y)"
         tokens = lexer(input_str)
