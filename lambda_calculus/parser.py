@@ -1,6 +1,6 @@
 from lambda_calculus.lexer import Token
 from lambda_calculus.core import Variable, Function, Application
-
+from collections import deque
 
 class Parser:
     def __init__(self, tokens):
@@ -11,12 +11,35 @@ class Parser:
         return self.parse_expression()
 
     def parse_expression(self):
-        # Parse either a function or an application
-        left = self.parse_term()
-        while self.peek(Token.VARIABLE) or self.peek(Token.LPAREN) or self.peek(Token.LAMBDA):
-            right = self.parse_term()
-            left = Application(left, right)
-        return left
+        stack = deque()
+        while self.pos < len(self.tokens):
+            if self.peek(Token.VARIABLE):
+                stack.append(self.parse_variable())
+            elif self.peek(Token.LPAREN):
+                stack.append(self.parse_parentheses())
+            elif self.peek(Token.LAMBDA):
+                stack.append(self.parse_function())
+            else:
+                break
+
+            if len(stack) >= 2:
+                arg = stack.pop()
+                func = stack.pop()
+                stack.append(Application(func, arg))
+
+        if not stack:
+            raise SyntaxError("Empty expression")
+        return stack.pop()
+
+    def parse_variable(self):
+        token = self.consume(Token.VARIABLE)
+        return Variable(token.value)
+
+    def parse_parentheses(self):
+        self.consume(Token.LPAREN)
+        expr = self.parse_expression()
+        self.consume(Token.RPAREN)
+        return expr
 
     def parse_function(self):
         self.consume(Token.LAMBDA)
@@ -24,19 +47,6 @@ class Parser:
         self.consume(Token.DOT)
         term = self.parse_expression()
         return Function(Variable(var), term)
-
-    def parse_term(self):
-        if self.peek(Token.VARIABLE):
-            return Variable(self.consume(Token.VARIABLE).value)
-        elif self.peek(Token.LPAREN):
-            self.consume(Token.LPAREN)
-            expr = self.parse_expression()
-            self.consume(Token.RPAREN)
-            return expr
-        elif self.peek(Token.LAMBDA):
-            return self.parse_function()
-        else:
-            raise SyntaxError("Expected variable or '('")
 
     def peek(self, token_type):
         return self.pos < len(self.tokens) and self.tokens[self.pos].type == token_type

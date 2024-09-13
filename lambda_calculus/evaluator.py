@@ -1,14 +1,17 @@
+from cgitb import reset
+from functools import reduce
+from itertools import count
+
 from .core import Application, Function, Variable
 
 
 class Evaluator:
+
     def reduce(self, expr):
         if isinstance(expr, Application):
             func = self.reduce(expr.func)
             arg = self.reduce(expr.arg)
-
             if isinstance(func, Function):
-                # Réduction bêta : appliquer l'argument à la fonction
                 return self.substitute(func.term, func.var, arg)
             else:
                 return Application(func, arg)
@@ -25,7 +28,6 @@ class Evaluator:
             if term.var.name == var.name:
                 return term  # Pas de substitution si la variable est la même
             else:
-                # Substituer dans le corps de la fonction
                 return Function(term.var, self.substitute(term.term, var, value))
         elif isinstance(term, Application):
             # Substituer dans la fonction et l'argument
@@ -49,4 +51,27 @@ class Evaluator:
     def simplify_and_format(self, expr):
         reduced_expr = self.reduce(expr)
         return self.format_expression(reduced_expr)
+
+    def church_to_int(self, expr):
+        """Convertit une expression Church évaluée en entier Python."""
+
+        def increment(x):
+            return x + 1
+
+        reduced_expr = self.reduce(expr)
+
+        if isinstance(reduced_expr, Function):
+            f = increment
+            x = 0
+            while isinstance(reduced_expr, Function):
+               reduced_expr = reduced_expr.term
+               if isinstance(reduced_expr, Application):
+                    f = increment
+                    x = 0
+                    while isinstance(reduced_expr, Application):
+                        x = f(x)
+                        reduced_expr = reduced_expr.arg
+            return x
+        return None
+
 

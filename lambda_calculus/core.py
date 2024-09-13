@@ -29,6 +29,7 @@ class Function:
         self.var = var
         self.term = term
 
+
     def __str__(self):
         return f'λ{self.var}.{self.term}'
 

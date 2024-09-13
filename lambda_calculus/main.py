@@ -12,7 +12,7 @@ def main():
     evaluator = Evaluator()
     print("Expression:", evaluator.simplify_and_format(expr))
 
-    input_str = "(λx.λy.y y) λz.z"
+    input_str = "(λx.x x) (λx.x x)"
     tokens = lexer(input_str)
     print("Tokens:", tokens)
     parser = Parser(tokens)
